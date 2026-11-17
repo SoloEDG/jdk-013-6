@@ -17,6 +17,7 @@ import { ChapterList, MediaPlayer, Transport } from "../features/chapters";
 import { HotspotLayer, HotspotDetail } from "../features/hotspots";
 import { InterviewPanel, PeopleList } from "../features/interviews";
 import { JournalPanel } from "../features/journal";
+import { OrchestratorPanel, NextSteps } from "../features/orchestration";
 import { createWorkspace } from "./workspace";
 const w = createWorkspace(),
   about = ref(false),
@@ -49,6 +50,11 @@ async function fullscreen() {
           @click="w.tab.value = 'journal'"
         >
           探索手记 <span>{{ w.journal.entries.value.length }}</span></button
+        ><button
+          :class="{ active: w.tab.value === 'orchestrate' }"
+          @click="w.tab.value = 'orchestrate'"
+        >
+          故事编排</button
         ><button @click="about = true">
           关于本片 <ArrowUpRight :size="13" />
         </button>
@@ -126,6 +132,13 @@ async function fullscreen() {
             <p v-if="fullError" role="status">{{ fullError }}</p>
           </section>
           <aside class="sidebar">
+            <NextSteps
+              v-if="w.orchestration.published.value && !w.branch.personId.value"
+              :graph="w.orchestration.published.value.graph"
+              :options="w.nextOptions.value"
+              :version="w.orchestration.published.value.version"
+              @follow="w.followEdge($event)"
+            />
             <div class="section-heading">
               <h2>故事章节</h2>
               <span>CHAPTERS</span>
@@ -180,7 +193,10 @@ async function fullscreen() {
             </div>
             <PeopleList @open="w.enterPerson($event)" />
           </div></section></template
-      ><JournalPanel
+      ><OrchestratorPanel
+        v-else-if="w.tab.value === 'orchestrate'"
+        :orch="w.orchestration"
+      /><JournalPanel
         v-else
         :journal="w.journal"
         @revisit="w.dispatch({ type: 'revisit', entry: $event })"

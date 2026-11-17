@@ -1,4 +1,5 @@
 import { ref } from "vue";
+import { hotspots } from "../../../shared/content";
 import type { Entry, Hotspot, Position } from "../../../shared/types";
 import { loadEntries, persist } from "../lib/storage";
 export function createJournal() {
@@ -33,6 +34,31 @@ export function createJournal() {
       ]);
     },
     remove: (id: string) => commit(entries.value.filter((e) => e.id !== id)),
+    /** 故事节点被删除时：把受影响收藏标记为失效（保留记录，不悄悄改指） */
+    markOrphaned: (ids: string[]) =>
+      commit(
+        entries.value.map((e) =>
+          ids.includes(e.id) ? { ...e, orphaned: true } : e,
+        ),
+      ),
+    /** 策展人在重接方案中显式选择后，才把收藏改接到另一个热点故事 */
+    rewireTo: (id: string, hotspotId: string) => {
+      const h = hotspots.find((h) => h.id === hotspotId);
+      if (!h) return;
+      commit(
+        entries.value.map((e) =>
+          e.id === id
+            ? {
+                ...e,
+                hotspotId: h.id,
+                chapterId: h.chapterId,
+                title: h.title,
+                orphaned: false,
+              }
+            : e,
+        ),
+      );
+    },
     note: (id: string, note: string) =>
       commit(
         entries.value.map((e) =>

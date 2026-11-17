@@ -47,6 +47,8 @@ export interface Entry {
   title: string;
   note: string;
   createdAt: number;
+  /** 对应的故事节点被策展人删除后，收藏保留但标记为失效（不会被悄悄改指） */
+  orphaned?: boolean;
 }
 export type Command =
   | { type: "chapter"; id: string }

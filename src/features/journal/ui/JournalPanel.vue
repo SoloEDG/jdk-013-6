@@ -44,6 +44,9 @@ defineEmits<{ revisit: [entry: Entry] }>();
           {{ new Date(e.createdAt).toLocaleDateString("zh-CN") }}</small
         >
         <h3>{{ e.title }}</h3>
+        <small v-if="e.orphaned" class="orphaned-badge"
+          >原故事段落已被策展人移除 · 收藏已保留</small
+        >
       </div>
       <button class="text-button" @click="$emit('revisit', e)">
         回到现场 <ArrowUpRight :size="16" /></button
